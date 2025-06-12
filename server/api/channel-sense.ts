@@ -1,56 +1,54 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
+import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 app.post("/api/channel-sense", async (req, res) => {
   const { query } = req.body;
 
-  if (!OPENAI_API_KEY) {
+  if (!GEMINI_API_KEY) {
     return res.status(500).json({ error: "API key not set." });
   }
 
   try {
-    const prompt = `
-      Ти — асистент для аналізу каналів Farcaster.
-      Користувач запитав: "${query}"
-      Дай коротку й точну відповідь українською мовою.
-    `;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+    const response = await axios.post(
+      url,
+      {
+        contents: [
+          {
+            parts: [
+              { text: query }
+            ]
+          }
+        ]
       },
-      body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: "Ти — помічник Farcaster каналу, відповідай стисло та українською." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7
-      })
-    });
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
-    const data = await openaiResponse.json();
+    // Відповідь API повертає текст в response.data.candidates[0].content або подібному
+    // За потреби подивись реальний формат у response.data
+    const generatedText = response.data.candidates?.[0]?.content || "Немає відповіді.";
 
-    const answer = data.choices?.[0]?.message?.content || "Немає відповіді.";
-
-    res.json({ result: answer });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Помилка під час виклику OpenAI API." });
+    res.json({ result: generatedText });
+  } catch (error: any) {
+    console.error("Помилка при зверненні до Gemini API:", error.response?.data || error.message || error);
+    res.status(500).json({ error: "Помилка під час виклику Gemini API." });
   }
 });
 
