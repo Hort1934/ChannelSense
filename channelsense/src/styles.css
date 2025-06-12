@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f9fc;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+textarea {
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #0052cc;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #003d99;
+}
+
+pre {
+  background-color: #eaeaea;
+  padding: 1rem;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  font-size: 1rem;
+}
